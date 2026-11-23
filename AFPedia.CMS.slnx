@@ -5,4 +5,7 @@
     <Project Path="src/AFPedia.CMS.Application/AFPedia.CMS.Application.csproj" />
     <Project Path="src/AFPedia.CMS.Infrastructure/AFPedia.CMS.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AFPedia.CMS.UnitTests/AFPedia.CMS.UnitTests.csproj" />
+  </Folder>
 </Solution>
