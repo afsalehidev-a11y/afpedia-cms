@@ -11,8 +11,26 @@ Open-source, independently deployable content management system for cultural org
 - API: REST, versioned under `/api/v1`
 - Admin frontend: React + TypeScript (planned)
 
+## Solution layout
+
+- `src/AFPedia.CMS.Api` — ASP.NET Core host and HTTP endpoints
+- `src/AFPedia.CMS.Domain` — domain model and business invariants
+- `src/AFPedia.CMS.Application` — use cases and application contracts
+- `src/AFPedia.CMS.Infrastructure` — persistence and external integrations
+- `docs/` — architecture and operational documentation
+
+The projects are logical layers within one deployable application, not separate services.
+
 ## Deployment model
 Every organization has an independent CMS installation, database, media storage, and backups. After initial installation and handover, the organization is responsible for its server and ongoing infrastructure operations.
 
-## Initial status
-The repository skeleton is being established. Runnable setup instructions will be added with the first application implementation.
+## Build
+Requires the .NET 10 SDK.
+
+```bash
+dotnet restore AFPedia.CMS.slnx
+dotnet build AFPedia.CMS.slnx
+dotnet run --project src/AFPedia.CMS.Api
+```
+
+The initial API exposes `GET /health`. Database integration, migrations, and automated tests are subsequent implementation steps.
