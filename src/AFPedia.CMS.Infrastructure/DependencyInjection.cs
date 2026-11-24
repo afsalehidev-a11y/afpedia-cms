@@ -1,5 +1,6 @@
 using AFPedia.CMS.Infrastructure.Identity;
 using AFPedia.CMS.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,23 +39,20 @@ public static class DependencyInjection
                 options.Lockout.AllowedForNewUsers = true;
             })
             .AddRoles<CmsRole>()
-            .AddEntityFrameworkStores<CmsIdentityDbContext>()
-            .AddSignInManager();
+            .AddEntityFrameworkStores<CmsIdentityDbContext>();
 
         services
-            .AddAuthentication(IdentityConstants.ApplicationScheme)
-            .AddIdentityCookies();
-
-        services.ConfigureApplicationCookie(options =>
-        {
-            options.Cookie.Name = "__Host-AFPedia.CMS.Auth";
-            options.Cookie.HttpOnly = true;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-            options.Cookie.SameSite = SameSiteMode.Lax;
-            options.Cookie.Path = "/";
-            options.SlidingExpiration = true;
-            options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        });
+            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.Cookie.Name = "__Host-AFPedia.CMS.Auth";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.Path = "/";
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+            });
 
         services.AddAuthorization();
 
