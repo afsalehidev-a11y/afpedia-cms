@@ -42,6 +42,8 @@ public static class DependencyInjection
             .AddRoles<CmsRole>()
             .AddEntityFrameworkStores<CmsIdentityDbContext>();
 
+        services.AddScoped<CmsRoleSeeder>();
+
         services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -55,7 +57,16 @@ public static class DependencyInjection
                 options.ExpireTimeSpan = TimeSpan.FromHours(8);
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(CmsAuthorizationPolicies.ManagerOnly,
+                policy => policy.RequireRole(CmsRoleNames.OrganizationManager));
+
+            options.AddPolicy(CmsAuthorizationPolicies.ContentEditors,
+                policy => policy.RequireRole(
+                    CmsRoleNames.OrganizationManager,
+                    CmsRoleNames.Author));
+        });
 
         return services;
     }
