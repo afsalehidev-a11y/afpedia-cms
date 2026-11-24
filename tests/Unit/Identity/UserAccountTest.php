@@ -13,12 +13,12 @@ final class UserAccountTest extends TestCase
 {
     private function account(): UserAccount
     {
-        return new UserAccount('user-1', 'author@example.org', 'Author', UserRole::Author, new \DateTimeImmutable('now'));
+        return new UserAccount('11111111-1111-4111-8111-111111111111', 'author@example.org', 'Author', UserRole::Author, new \DateTimeImmutable('now'));
     }
 
     public function test_it_trims_values_and_starts_active(): void
     {
-        $account = new UserAccount('user-1', ' manager@example.org ', ' Manager ', UserRole::OrganizationManager, new \DateTimeImmutable('now'));
+        $account = new UserAccount('11111111-1111-4111-8111-111111111111', ' manager@example.org ', ' Manager ', UserRole::OrganizationManager, new \DateTimeImmutable('now'));
         self::assertSame('manager@example.org', $account->email());
         self::assertSame('Manager', $account->displayName());
         self::assertTrue($account->isActive());
@@ -52,13 +52,13 @@ final class UserAccountTest extends TestCase
     public function test_it_rejects_blank_email_or_display_name(): void
     {
         try {
-            new UserAccount('user-1', ' ', 'Author', UserRole::Author, new \DateTimeImmutable('now'));
+            new UserAccount('11111111-1111-4111-8111-111111111111', ' ', 'Author', UserRole::Author, new \DateTimeImmutable('now'));
             self::fail('Blank email should be rejected.');
         } catch (InvalidArgumentException) {
             self::assertTrue(true);
         }
 
         $this->expectException(InvalidArgumentException::class);
-        new UserAccount('user-1', 'a@example.org', ' ', UserRole::Author, new \DateTimeImmutable('now'));
+        new UserAccount('11111111-1111-4111-8111-111111111111', 'a@example.org', ' ', UserRole::Author, new \DateTimeImmutable('now'));
     }
 }
