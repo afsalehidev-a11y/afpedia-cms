@@ -1,6 +1,7 @@
 using AFPedia.CMS.Infrastructure.Identity;
 using AFPedia.CMS.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
