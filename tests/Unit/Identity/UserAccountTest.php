@@ -19,20 +19,19 @@ final class UserAccountTest extends TestCase
     public function test_it_trims_values_and_starts_active(): void
     {
         $account = new UserAccount('user-1', ' manager@example.org ', ' Manager ', UserRole::OrganizationManager, new \DateTimeImmutable('now'));
-
-        self::assertSame('manager@example.org', $account->email);
-        self::assertSame('Manager', $account->displayName);
-        self::assertTrue($account->isActive);
-        self::assertSame(UserRole::OrganizationManager, $account->role);
+        self::assertSame('manager@example.org', $account->email());
+        self::assertSame('Manager', $account->displayName());
+        self::assertTrue($account->isActive());
+        self::assertSame(UserRole::OrganizationManager, $account->role());
     }
 
     public function test_it_can_be_deactivated_and_reactivated(): void
     {
         $account = $this->account();
         $account->deactivate();
-        self::assertFalse($account->isActive);
+        self::assertFalse($account->isActive());
         $account->activate();
-        self::assertTrue($account->isActive);
+        self::assertTrue($account->isActive());
     }
 
     public function test_it_can_change_role_and_display_name(): void
@@ -40,9 +39,8 @@ final class UserAccountTest extends TestCase
         $account = $this->account();
         $account->changeRole(UserRole::OrganizationManager);
         $account->changeDisplayName('  Manager  ');
-
-        self::assertSame(UserRole::OrganizationManager, $account->role);
-        self::assertSame('Manager', $account->displayName);
+        self::assertSame(UserRole::OrganizationManager, $account->role());
+        self::assertSame('Manager', $account->displayName());
     }
 
     public function test_it_rejects_empty_identity_and_text_fields(): void
