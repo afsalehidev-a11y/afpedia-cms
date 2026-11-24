@@ -1,40 +1,27 @@
-# Architecture Overview
+# Architecture overview
 
-## Deployment boundary
+AFPedia CMS is open-source software installed independently on each organization's hosting account or server. This repository contains the CMS only, not the central AFPedia website.
 
-AFPedia CMS is installed independently for each organization. Each installation owns its application runtime, database, uploaded media, configuration, and backups. There is no central runtime, tenant registry, or required persistent connection to AFPedia.
+## Platform
+- PHP 8.2+ and Laravel 12.
+- MySQL 8+ or MariaDB 10.6+ are initial targets; validate against actual shared-hosting providers before release.
+- Modular Monolith: one deployable application organized into bounded modules.
+- Browser-based installation is a core requirement; customers must not need SSH or Composer.
+- Each installation owns its database, files, configuration, and backups. No central connection is required after handover.
 
-## Architectural style
+## Modules
+Identity & Access; Content and Revisions; Workflow and Publication; Localization; Media; Navigation; Themes; Plugins; SEO and Routing; Search; Notifications; Audit; Installer and Updater; Backup and Export.
 
-The MVP uses a Modular Monolith. Modules are separated by business responsibility while being deployed as one application. Microservices are not part of the MVP.
+Modules communicate through application services and explicit contracts. Avoid direct cross-module table manipulation when a service contract is appropriate.
 
-## Initial technology choices
+## Content and localization
+A content record is the shared identity. Each locale has its own translation record, slug, SEO fields, and publication state. Persian (fa) is default; English (en) is enabled for MVP. Future locales are data-driven.
 
-- C# and ASP.NET Core on .NET 10
-- PostgreSQL as the planned relational database
-- Entity Framework Core as the planned data access layer
-- REST API under `/api/v1`
-- React + TypeScript for the administration interface (planned)
+## Roles
+Organization Manager and Author are the MVP roles. Authorization is enforced server-side.
 
-## Initial module boundaries
+## Future multi-tenancy
+Multi-tenancy is not part of MVP. Keep organization-specific concerns behind services and data-access boundaries. Do not add a tenant identifier to independent installations. Future shared-hosting topology remains undecided.
 
-- Identity and Access
-- Content and Revisions
-- Workflow and Publishing
-- Localization
-- Media
-- Navigation
-- Themes
-- Plugins
-- SEO and Routing
-- Search
-- Notifications
-- Audit
-- Installation and Updates
-- Backup and Export
-
-These are logical module boundaries, not separate deployable services.
-
-## Update integrity
-
-Official core updates are available only while the core matches an approved official release. Local content, settings, themes, and plugins do not by themselves disable core updates. A modification to core code suspends official updates until the original official core is restored and integrity is verified.
+## Security and updates
+Use Laravel password hashing, CSRF protection, validation, escaped templates, and authorization policies. Apply upload allowlists and size limits. Official updates require integrity verification, backup, staging checks where hosting permits, and rollback. A modified core is ineligible for official updates until restored and verified.
