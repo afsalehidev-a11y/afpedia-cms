@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-final class AuthenticatedSessionController extends Controller
+final class AuthenticatedSessionController
 {
     public function create(): View
     {
