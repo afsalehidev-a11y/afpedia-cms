@@ -3,6 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../AFPedia.CMS.Application/AFPedia.CMS.Application.csproj" />
     <ProjectReference Include="../AFPedia.CMS.Domain/AFPedia.CMS.Domain.csproj" />
   </ItemGroup>
