@@ -6,8 +6,8 @@ namespace App\Support\Identity;
 
 final class CmsRoleNames
 {
-    public const ORGANIZATION_MANAGER = 'organization_manager';
-    public const AUTHOR = 'author';
+    public const ORGANIZATION_MANAGER = 'OrganizationManager';
+    public const AUTHOR = 'Author';
 
     /** @return list<string> */
     public static function all(): array
