@@ -13,8 +13,8 @@ final class CmsRoleSeeder extends Seeder
     {
         $now = now();
         DB::table('roles')->upsert([
-            ['name' => 'organization_manager', 'display_name' => 'Organization manager', 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'author', 'display_name' => 'Author', 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'OrganizationManager', 'display_name' => 'Organization manager', 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Author', 'display_name' => 'Author', 'is_system' => true, 'created_at' => $now, 'updated_at' => $now],
         ], ['name'], ['display_name', 'is_system', 'updated_at']);
     }
 }
