@@ -1,4 +1,5 @@
 using AFPedia.CMS.Domain.Identity;
+using Xunit;
 
 namespace AFPedia.CMS.UnitTests.Identity;
 
