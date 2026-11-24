@@ -21,8 +21,8 @@ final class UserAccount
         UserRole $role,
         public readonly \DateTimeImmutable $createdAtUtc,
     ) {
-        if (trim($id) === '') {
-            throw new InvalidArgumentException('User ID cannot be empty.');
+        if (! \Illuminate\Support\Str::isUuid($id)) {
+            throw new InvalidArgumentException('User ID must be a valid UUID.');
         }
 
         $this->email = self::requireText($email, 'email');
