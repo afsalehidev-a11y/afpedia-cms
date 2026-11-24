@@ -27,6 +27,7 @@ final class EloquentUserAccountRepository implements UserAccountRepository
     public function add(UserAccount $account): void
     {
         $user = new User();
+        $user->id = $account->id;
         $user->name = $account->displayName();
         $user->email = mb_strtolower(trim($account->email()));
         $user->role = $account->role();
