@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="../AFPedia.CMS.Application/AFPedia.CMS.Application.csproj" />
-    <ProjectReference Include="../AFPedia.CMS.Infrastructure/AFPedia.CMS.Infrastructure.csproj" />
-  </ItemGroup>
-</Project>
