@@ -1,31 +1,27 @@
-name: CI
-
+name: PHP CI
 on:
   push:
-    branches: [ main ]
+    branches: [main, migration/php-laravel-final]
   pull_request:
-    branches: [ main ]
-
+    branches: [main]
 permissions:
   contents: read
-
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
         with:
-          dotnet-version: 10.0.x
-
-      - name: Restore
-        run: dotnet restore AFPedia.CMS.slnx
-
-      - name: Build
-        run: dotnet build AFPedia.CMS.slnx --no-restore --configuration Release
-
-      - name: Test
-        run: dotnet test AFPedia.CMS.slnx --no-build --configuration Release
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, dom, fileinfo, pdo, pdo_sqlite, sqlite3, tokenizer, xml, ctype, curl
+          coverage: none
+      - run: composer validate --strict
+      - run: composer install --no-interaction --prefer-dist
+      - name: PHP syntax
+        run: find app bootstrap config database routes tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: php artisan test
