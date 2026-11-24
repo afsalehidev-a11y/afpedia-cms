@@ -1,45 +1,23 @@
-# Deployment requirements
+# Deployment and hosting requirements
 
-AFPedia CMS is a standalone ASP.NET Core application. Each organization runs its own installation and database.
+AFPedia CMS targets common PHP shared-hosting plans. Compatibility is not guaranteed for literally every provider; publish a tested minimum matrix before release.
 
-## Supported hosting model
+## MVP platform baseline
+- PHP 8.2 or newer, with required extensions checked by installer.
+- MySQL 8+ or MariaDB 10.6+ (minimums subject to provider testing).
+- HTTPS support.
+- Writable application storage, cache, and session directories.
+- Document root points to public/, or a documented safe layout keeps source code and .env outside public web access.
+- PHP CLI, SSH, cron, and Composer are not assumed available to the customer.
 
-The primary deployment target is a customer-managed Linux VPS or dedicated server. A Windows Server deployment is also possible. Ordinary PHP-only shared hosting is not sufficient: the host must allow an ASP.NET Core process to run continuously and provide access to PostgreSQL.
+## Release packaging and installation
+CI should produce a release archive with production dependencies included. Browser installer checks PHP version, extensions, DB connection, storage permissions, and application key. It must never expose .env, source, logs, or backups through the public document root.
 
-The application can be published as a self-contained deployment so the customer server does not need a separately installed .NET runtime. The published output is still specific to an operating system and CPU architecture.
+1. Upload prepared release package with hosting file manager.
+2. Follow browser installer.
+3. Enter database credentials and organization details.
+4. Create the first Organization Manager account; no default password is shipped.
+5. Run schema migrations through a locked, one-time installer operation.
+6. Verify the site and disable installer access.
 
-## Initial Linux publish
-
-From the repository root, using the .NET 10 SDK:
-
-```bash
-dotnet publish src/AFPedia.CMS.Api/AFPedia.CMS.Api.csproj \
-  --configuration Release \
-  --runtime linux-x64 \
-  --self-contained true \
-  -p:UseAppHost=true \
-  -o ./artifacts/publish/linux-x64
-```
-
-For ARM64 Linux servers, use `--runtime linux-arm64`. For Windows Server, use the matching Windows RID, for example `win-x64`. Confirm the customer's OS and CPU architecture before choosing the publish target.
-
-## Server components
-
-A production installation needs:
-- A supported Linux or Windows server where the ASP.NET Core process can run.
-- PostgreSQL, either on the same server or on a separately managed database server reachable over a private network.
-- Persistent writable storage for uploaded media and application data.
-- HTTPS termination and a reverse proxy such as Nginx on Linux, or an equivalent supported web-server configuration.
-- A process supervisor/service manager so the CMS restarts after a server reboot and can be monitored by the customer.
-
-## Configuration and secrets
-
-Set the production database connection string through the environment variable `ConnectionStrings__CmsDatabase` or the deployment's secret-management facility. Do not commit production credentials to Git or place them in the example settings file.
-
-The design-time EF Core factory contains only a non-production placeholder connection string for generating migrations; it is not a production default.
-
-## Hosting limitations
-
-PHP-only shared hosting without support for long-running ASP.NET Core applications is unsupported. Before accepting a customer hosting environment, verify OS, CPU architecture, ability to run a managed service, PostgreSQL connectivity, HTTPS/reverse-proxy support, writable persistent storage, and backup/restore access.
-
-Minimum CPU, RAM, storage, and production capacity figures remain to be established through representative load testing; this document does not claim unmeasured capacity or an SLA.
+Shared hosting differs widely. Queue workers, cron, symlinks, shell access, atomic deployments, and long-running processes may be unavailable. MVP features need synchronous or file/database-backed fallbacks where practical. Installer reports unsupported requirements clearly.
