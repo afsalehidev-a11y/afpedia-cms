@@ -6,4 +6,8 @@
     <ProjectReference Include="../AFPedia.CMS.Application/AFPedia.CMS.Application.csproj" />
     <ProjectReference Include="../AFPedia.CMS.Domain/AFPedia.CMS.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+  </ItemGroup>
 </Project>
