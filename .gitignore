@@ -1,23 +1,17 @@
-# .NET
-**/bin/
-**/obj/
-*.user
-*.suo
-.vs/
-.idea/
-
-# Secrets and local settings
+/vendor
+/node_modules
+/public/build
+/public/hot
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*
 .env
 .env.*
 !.env.example
-secrets.json
-appsettings.Local.json
-
-# Frontend
-node_modules/
-dist/
-coverage/
-
-# OS
+.phpunit.cache
 .DS_Store
-Thumbs.db
+.idea
+.vscode
