@@ -33,6 +33,7 @@ final class UserAccountRepositoryTest extends TestCase
         self::assertSame($id, $byId->id);
         self::assertSame('author@example.org', $byId->email());
         self::assertSame('Author', $byId->displayName());
+        self::assertSame('2026-01-01T00:00:00+00:00', $byId->createdAtUtc->format('Y-m-d\\TH:i:sP'));
 
         self::assertSame($id, $repository->getByEmail('AUTHOR@example.org')?->id);
     }
