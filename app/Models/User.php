@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -16,9 +17,7 @@ class User extends Authenticatable
 
     public $incrementing = false;
     protected $keyType = 'string';
-
     protected $fillable = ['name', 'email', 'password', 'role', 'is_active'];
-
     protected $hidden = ['password', 'remember_token'];
 
     protected static function booted(): void
@@ -38,14 +37,26 @@ class User extends Authenticatable
         ];
     }
 
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
+    }
+
+    public function hasCmsRole(UserRole $role): bool
+    {
+        return $this->roles()->where('normalized_name', mb_strtoupper($role->value))->exists();
+    }
+
     public function isManager(): bool
     {
-        return $this->is_active && $this->role === UserRole::OrganizationManager;
+        return $this->is_active && $this->hasCmsRole(UserRole::OrganizationManager);
     }
 
     public function canEditContent(): bool
     {
-        return $this->is_active
-            && in_array($this->role, [UserRole::OrganizationManager, UserRole::Author], true);
+        return $this->is_active && (
+            $this->hasCmsRole(UserRole::OrganizationManager)
+            || $this->hasCmsRole(UserRole::Author)
+        );
     }
 }
