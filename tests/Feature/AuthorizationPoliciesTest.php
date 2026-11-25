@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Feature;
+namespace Tests\Feature;
 
-use App\\Enums\\UserRole;
-use App\\Models\\Role;
-use App\\Models\\User;
-use App\\Support\\Identity\\CmsAuthorizationPolicies;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Illuminate\\Support\\Facades\\Gate;
-use Illuminate\\Support\\Str;
-use Tests\\TestCase;
+use App\Enums\UserRole;
+use App\Models\Role;
+use App\Models\User;
+use App\Support\Identity\CmsAuthorizationPolicies;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 final class AuthorizationPoliciesTest extends TestCase
 {
@@ -21,7 +21,7 @@ final class AuthorizationPoliciesTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\\Database\\Seeders\\CmsRoleSeeder::class);
+        $this->seed(\Database\Seeders\CmsRoleSeeder::class);
     }
 
     public function test_active_manager_can_manage_the_installation(): void
