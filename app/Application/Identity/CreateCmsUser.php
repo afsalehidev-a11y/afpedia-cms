@@ -47,7 +47,8 @@ final class CreateCmsUser
                 'normalized_email' => $normalizedEmail,
                 'email_confirmed' => false,
                 'password' => $password,
-                'password_hash' => $password,
+                // Reserved for imported ASP.NET Identity hashes; never store plaintext here.
+                'password_hash' => null,
                 'security_stamp' => $securityStamp,
                 'concurrency_stamp' => $concurrencyStamp,
                 'lockout_enabled' => true,
