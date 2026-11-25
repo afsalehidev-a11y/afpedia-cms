@@ -47,8 +47,8 @@ final class CreateCmsUserTest extends TestCase
         $this->assertSame('MANAGER@EXAMPLE.ORG', $user->normalized_email);
         $this->assertFalse($user->email_confirmed);
         $this->assertNotSame('StrongPassword123', $user->password);
-        $this->assertNotSame('StrongPassword123', $user->password_hash);
-        $this->assertTrue(Hash::check('StrongPassword123', $user->password_hash));
+        $this->assertTrue(Hash::check('StrongPassword123', $user->password));
+        $this->assertNull($user->password_hash);
         $this->assertNotEmpty($user->security_stamp);
         $this->assertNotEmpty($user->concurrency_stamp);
         $this->assertTrue($user->lockout_enabled);
