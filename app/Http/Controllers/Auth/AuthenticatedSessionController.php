@@ -22,7 +22,7 @@ final class AuthenticatedSessionController
         return view('auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AspNetIdentityPasswordHasher $aspNetHasher): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'string', 'email'],
@@ -30,7 +30,7 @@ final class AuthenticatedSessionController
         ]);
         $email = mb_strtolower(trim($credentials['email']));
 
-        $authenticated = DB::transaction(function () use ($request, $email, $credentials): bool {
+        $authenticated = DB::transaction(function () use ($request, $email, $credentials, $aspNetHasher): bool {
             $user = User::query()->where('email', $email)->lockForUpdate()->first();
 
             if (! $user || ! $user->is_active) {
@@ -41,7 +41,7 @@ final class AuthenticatedSessionController
                 return false;
             }
 
-            if (! Hash::check($credentials['password'], $user->password)) {
+            $laravelPasswordMatches = Hash::check($credentials['password'], $user->password);\n            $legacyPasswordMatches = ! $laravelPasswordMatches\n                && is_string($user->password_hash)\n                && $aspNetHasher->verify($user->password_hash, $credentials['password']);\n\n            if (! $laravelPasswordMatches && ! $legacyPasswordMatches) {
                 if ($user->lockout_enabled) {
                     $user->access_failed_count++;
                     if ($user->access_failed_count >= self::MAX_FAILED_ATTEMPTS) {
