@@ -18,6 +18,9 @@ final class CreateCmsUser
         string $password,
         UserRole $role,
     ): User {
+        $name = trim($name);
+        $email = mb_strtolower(trim($email));
+
         Validator::make(
             ['name' => $name, 'email' => $email, 'password' => $password],
             [
@@ -28,8 +31,8 @@ final class CreateCmsUser
         )->validate();
 
         return DB::transaction(fn (): User => User::query()->create([
-            'name' => trim($name),
-            'email' => mb_strtolower(trim($email)),
+            'name' => $name,
+            'email' => $email,
             'password' => $password,
             'role' => $role,
             'is_active' => true,
