@@ -1,3 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Enums;
-enum UserRole: string { case OrganizationManager = 'organization_manager'; case Author = 'author'; }
+
+enum UserRole: string
+{
+    case OrganizationManager = 'OrganizationManager';
+    case Author = 'Author';
+}
