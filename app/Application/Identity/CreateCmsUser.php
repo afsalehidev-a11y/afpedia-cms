@@ -22,6 +22,9 @@ final class CreateCmsUser
     ): User {
         $name = trim($name);
         $email = mb_strtolower(trim($email));
+        $normalizedEmail = mb_strtoupper($email);
+        $securityStamp = (string) Str::uuid();
+        $concurrencyStamp = (string) Str::uuid();
 
         Validator::make(
             ['name' => $name, 'email' => $email, 'password' => $password],
@@ -32,11 +35,24 @@ final class CreateCmsUser
             ],
         )->validate();
 
-        return DB::transaction(function () use ($name, $email, $password, $role): User {
+        return DB::transaction(function () use (
+            $name, $email, $normalizedEmail, $password, $role,
+            $securityStamp, $concurrencyStamp,
+        ): User {
             $user = User::query()->create([
                 'name' => $name,
+                'user_name' => $email,
+                'normalized_user_name' => $normalizedEmail,
                 'email' => $email,
+                'normalized_email' => $normalizedEmail,
+                'email_confirmed' => false,
                 'password' => $password,
+                'password_hash' => $password,
+                'security_stamp' => $securityStamp,
+                'concurrency_stamp' => $concurrencyStamp,
+                'lockout_enabled' => true,
+                'access_failed_count' => 0,
+                'created_at_utc' => now('UTC'),
                 'role' => $role,
                 'is_active' => true,
             ]);
