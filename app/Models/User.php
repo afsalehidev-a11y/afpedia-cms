@@ -39,7 +39,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'password_hash' => 'hashed',
             'email_confirmed' => 'boolean',
             'phone_number_confirmed' => 'boolean',
             'two_factor_enabled' => 'boolean',
