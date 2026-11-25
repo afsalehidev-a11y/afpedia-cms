@@ -14,7 +14,8 @@ return new class extends Migration {
             $table->string('normalized_user_name', 256)->nullable()->unique()->after('user_name');
             $table->string('normalized_email', 256)->nullable()->index()->after('email');
             $table->boolean('email_confirmed')->default(false)->after('email_verified_at');
-            $table->string('security_stamp', 36)->nullable()->after('password');
+            $table->string('password_hash')->nullable()->after('password');
+            $table->string('security_stamp', 36)->nullable()->after('password_hash');
             $table->string('concurrency_stamp', 36)->nullable()->after('security_stamp');
             $table->string('phone_number', 32)->nullable()->after('concurrency_stamp');
             $table->boolean('phone_number_confirmed')->default(false)->after('phone_number');
@@ -71,19 +72,11 @@ return new class extends Migration {
             $table->dropUnique(['normalized_user_name']);
             $table->dropIndex(['normalized_email']);
             $table->dropColumn([
-                'user_name',
-                'normalized_user_name',
-                'normalized_email',
-                'email_confirmed',
-                'security_stamp',
-                'concurrency_stamp',
-                'phone_number',
-                'phone_number_confirmed',
-                'two_factor_enabled',
-                'lockout_end',
-                'lockout_enabled',
-                'access_failed_count',
-                'created_at_utc',
+                'user_name', 'normalized_user_name', 'normalized_email',
+                'email_confirmed', 'password_hash', 'security_stamp',
+                'concurrency_stamp', 'phone_number', 'phone_number_confirmed',
+                'two_factor_enabled', 'lockout_end', 'lockout_enabled',
+                'access_failed_count', 'created_at_utc',
             ]);
         });
     }
