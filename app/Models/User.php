@@ -17,8 +17,15 @@ class User extends Authenticatable
 
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['name', 'email', 'password', 'role', 'is_active'];
-    protected $hidden = ['password', 'remember_token'];
+    protected $fillable = [
+        'name', 'email', 'password', 'password_hash', 'user_name',
+        'normalized_user_name', 'normalized_email', 'email_confirmed',
+        'security_stamp', 'concurrency_stamp', 'phone_number',
+        'phone_number_confirmed', 'two_factor_enabled', 'lockout_end',
+        'lockout_enabled', 'access_failed_count', 'created_at_utc',
+        'role', 'is_active',
+    ];
+    protected $hidden = ['password', 'password_hash', 'remember_token', 'security_stamp', 'concurrency_stamp'];
 
     protected static function booted(): void
     {
@@ -32,6 +39,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'password_hash' => 'hashed',
+            'email_confirmed' => 'boolean',
+            'phone_number_confirmed' => 'boolean',
+            'two_factor_enabled' => 'boolean',
+            'lockout_end' => 'datetime',
+            'lockout_enabled' => 'boolean',
+            'access_failed_count' => 'integer',
+            'created_at_utc' => 'immutable_datetime',
             'role' => UserRole::class,
             'is_active' => 'boolean',
         ];
