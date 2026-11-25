@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\\Support\\Identity;
+namespace App\Support\Identity;
 
 final class AspNetIdentityPasswordHasher
 {
