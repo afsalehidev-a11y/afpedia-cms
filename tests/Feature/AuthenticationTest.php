@@ -103,6 +103,35 @@ final class AuthenticationTest extends TestCase
         $this->assertNull($user->fresh()->lockout_end);
     }
 
+
+    public function test_legacy_aspnet_identity_password_is_upgraded_after_successful_login(): void
+    {
+        $password = 'LegacyPassword123';
+        $salt = random_bytes(16);
+        $iterations = 10000;
+        $subkey = hash_pbkdf2('sha256', $password, $salt, $iterations, 32, true);
+        $legacyHash = base64_encode("\x01".pack('N3', 1, $iterations, strlen($salt)).$salt.$subkey);
+
+        $user = User::create([
+            'name' => 'Legacy Manager',
+            'email' => 'legacy@example.org',
+            'password' => 'temporary-laravel-password',
+            'password_hash' => $legacyHash,
+            'role' => UserRole::OrganizationManager,
+            'is_active' => true,
+        ]);
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => $password,
+        ])->assertRedirect('/');
+
+        $this->assertAuthenticatedAs($user);
+        $user->refresh();
+        $this->assertTrue(Hash::check($password, $user->password));
+        $this->assertNull($user->password_hash);
+    }
+
     public function test_user_can_sign_out(): void
     {
         $user = User::create([
