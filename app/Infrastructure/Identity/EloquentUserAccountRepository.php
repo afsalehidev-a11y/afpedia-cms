@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\\Infrastructure\\Identity;
+namespace App\Infrastructure\Identity;
 
-use App\\Application\\Identity\\UserAccountRepository;
-use App\\Domain\\Identity\\UserAccount;
-use App\\Enums\\UserRole;
-use App\\Models\\Role;
-use App\\Models\\User;
+use App\Application\Identity\UserAccountRepository;
+use App\Domain\Identity\UserAccount;
+use App\Enums\UserRole;
+use App\Models\Role;
+use App\Models\User;
 use DateTimeImmutable;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 final class EloquentUserAccountRepository implements UserAccountRepository
 {
