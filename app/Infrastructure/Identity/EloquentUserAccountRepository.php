@@ -32,6 +32,7 @@ final class EloquentUserAccountRepository implements UserAccountRepository
         $user->email = mb_strtolower(trim($account->email()));
         $user->role = $account->role();
         $user->is_active = $account->isActive();
+        $user->created_at_utc = $account->createdAtUtc;
         $user->password = bin2hex(random_bytes(32));
         $user->save();
     }
@@ -53,7 +54,7 @@ final class EloquentUserAccountRepository implements UserAccountRepository
             (string) $user->email,
             (string) $user->name,
             $user->role instanceof UserRole ? $user->role : UserRole::from((string) $user->role),
-            new DateTimeImmutable($user->created_at?->toISOString() ?? 'now'),
+            new DateTimeImmutable($user->created_at_utc?->toISOString() ?? $user->created_at?->toISOString() ?? 'now'),
         );
 
         if (! $user->is_active) {
