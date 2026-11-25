@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+namespace Tests\\Feature;
 
-use App\Application\Identity\UserAccountRepository;
-use App\Domain\Identity\UserAccount;
-use App\Enums\UserRole;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\\Application\\Identity\\UserAccountRepository;
+use App\\Domain\\Identity\\UserAccount;
+use App\\Enums\\UserRole;
+use App\\Models\\User;
+use Illuminate\\Foundation\\Testing\\RefreshDatabase;
+use Tests\\TestCase;
 
 final class UserAccountRepositoryTest extends TestCase
 {
@@ -23,7 +24,7 @@ final class UserAccountRepositoryTest extends TestCase
             ' AUTHOR@example.org ',
             '  Author  ',
             UserRole::Author,
-            new \DateTimeImmutable('2026-01-01T00:00:00+00:00'),
+            new \\DateTimeImmutable('2026-01-01T00:00:00+00:00'),
         );
 
         $repository->add($account);
@@ -33,9 +34,10 @@ final class UserAccountRepositoryTest extends TestCase
         self::assertSame($id, $byId->id);
         self::assertSame('author@example.org', $byId->email());
         self::assertSame('Author', $byId->displayName());
-        self::assertSame('2026-01-01T00:00:00+00:00', $byId->createdAtUtc->format('Y-m-d\\TH:i:sP'));
-
+        self::assertSame('2026-01-01T00:00:00+00:00', $byId->createdAtUtc->format('Y-m-d\\\\TH:i:sP'));
         self::assertSame($id, $repository->getByEmail('AUTHOR@example.org')?->id);
+
+        self::assertTrue(User::query()->findOrFail($id)->hasCmsRole(UserRole::Author));
     }
 
     public function test_it_persists_role_and_activation_changes(): void
@@ -47,7 +49,7 @@ final class UserAccountRepositoryTest extends TestCase
             'author@example.org',
             'Author',
             UserRole::Author,
-            new \DateTimeImmutable('2026-01-01T00:00:00+00:00'),
+            new \\DateTimeImmutable('2026-01-01T00:00:00+00:00'),
         );
         $repository->add($account);
 
@@ -61,5 +63,9 @@ final class UserAccountRepositoryTest extends TestCase
         self::assertSame(UserRole::OrganizationManager, $stored->role());
         self::assertSame('Manager', $stored->displayName());
         self::assertFalse($stored->isActive());
+
+        $storedUser = User::query()->findOrFail($id);
+        self::assertTrue($storedUser->hasCmsRole(UserRole::OrganizationManager));
+        self::assertFalse($storedUser->hasCmsRole(UserRole::Author));
     }
 }
