@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Unit\\Identity;
+namespace Tests\Unit\Identity;
 
-use App\\Support\\Identity\\AspNetIdentityPasswordHasher;
-use PHPUnit\\Framework\\TestCase;
+use App\Support\Identity\AspNetIdentityPasswordHasher;
+use PHPUnit\Framework\TestCase;
 
 final class AspNetIdentityPasswordHasherTest extends TestCase
 {
@@ -15,7 +15,7 @@ final class AspNetIdentityPasswordHasherTest extends TestCase
         $salt = random_bytes(16);
         $iterations = 10000;
         $subkey = hash_pbkdf2('sha256', $password, $salt, $iterations, 32, true);
-        $hash = base64_encode("\\x01".pack('N3', 1, $iterations, strlen($salt)).$salt.$subkey);
+        $hash = base64_encode("\x01".pack('N3', 1, $iterations, strlen($salt)).$salt.$subkey);
 
         $hasher = new AspNetIdentityPasswordHasher();
 
@@ -28,7 +28,7 @@ final class AspNetIdentityPasswordHasherTest extends TestCase
         $password = 'Legacy-Password-123';
         $salt = random_bytes(16);
         $subkey = hash_pbkdf2('sha1', $password, $salt, 1000, 32, true);
-        $hash = base64_encode("\\x00".$salt.$subkey);
+        $hash = base64_encode("\x00".$salt.$subkey);
 
         self::assertTrue((new AspNetIdentityPasswordHasher())->verify($hash, $password));
     }
@@ -38,6 +38,6 @@ final class AspNetIdentityPasswordHasherTest extends TestCase
         $hasher = new AspNetIdentityPasswordHasher();
 
         self::assertFalse($hasher->verify('not-base64!', 'password'));
-        self::assertFalse($hasher->verify(base64_encode("\\x01".str_repeat("\\x00", 12)), 'password'));
+        self::assertFalse($hasher->verify(base64_encode("\x01".str_repeat("\x00", 12)), 'password'));
     }
 }
