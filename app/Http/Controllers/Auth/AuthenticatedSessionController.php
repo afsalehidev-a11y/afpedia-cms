@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;\nuse App\Support\Identity\AspNetIdentityPasswordHasher;
+use App\Models\User;
+use App\Support\Identity\AspNetIdentityPasswordHasher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,7 +42,12 @@ final class AuthenticatedSessionController
                 return false;
             }
 
-            $laravelPasswordMatches = Hash::check($credentials['password'], $user->password);\n            $legacyPasswordMatches = ! $laravelPasswordMatches\n                && is_string($user->password_hash)\n                && $aspNetHasher->verify($user->password_hash, $credentials['password']);\n\n            if (! $laravelPasswordMatches && ! $legacyPasswordMatches) {
+            $laravelPasswordMatches = Hash::check($credentials['password'], $user->password);
+            $legacyPasswordMatches = ! $laravelPasswordMatches
+                && is_string($user->password_hash)
+                && $aspNetHasher->verify($user->password_hash, $credentials['password']);
+
+            if (! $laravelPasswordMatches && ! $legacyPasswordMatches) {
                 if ($user->lockout_enabled) {
                     $user->access_failed_count++;
                     if ($user->access_failed_count >= self::MAX_FAILED_ATTEMPTS) {
@@ -53,10 +59,20 @@ final class AuthenticatedSessionController
                 return false;
             }
 
-            $user->forceFill([
+            $updates = [
                 'access_failed_count' => 0,
                 'lockout_end' => null,
-            ])->save();
+            ];
+
+            if ($legacyPasswordMatches || Hash::needsRehash($user->password)) {
+                $updates['password'] = Hash::make($credentials['password']);
+            }
+
+            if ($legacyPasswordMatches) {
+                $updates['password_hash'] = null;
+            }
+
+            $user->forceFill($updates)->save();
             Auth::login($user, $request->boolean('remember'));
 
             return true;
