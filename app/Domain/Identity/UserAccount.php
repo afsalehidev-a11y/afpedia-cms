@@ -39,7 +39,7 @@ final class UserAccount
 
     public function changeDisplayName(string $displayName): void
     {
-        $this->displayName = self::requireText($displayName, 'displayName');
+        $this->displayName = self::requireText($displayName, 'displayName', 160);
     }
 
     public function deactivate(): void { $this->isActive = false; }
