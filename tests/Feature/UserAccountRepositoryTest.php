@@ -17,13 +17,13 @@ final class UserAccountRepositoryTest extends TestCase
 
     public function test_display_name_is_limited_to_160_characters_on_create_and_update(): void
     {
-        $this->expectException(\\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         new UserAccount(
             '33333333-3333-4333-8333-333333333333',
             'author@example.org',
             str_repeat('a', 161),
             UserRole::Author,
-            new \\DateTimeImmutable('2026-01-01T00:00:00+00:00'),
+            new \DateTimeImmutable('2026-01-01T00:00:00+00:00'),
         );
     }
 
@@ -34,10 +34,10 @@ final class UserAccountRepositoryTest extends TestCase
             'author@example.org',
             'Author',
             UserRole::Author,
-            new \\DateTimeImmutable('2026-01-01T00:00:00+00:00'),
+            new \DateTimeImmutable('2026-01-01T00:00:00+00:00'),
         );
 
-        $this->expectException(\\InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
         $account->changeDisplayName(str_repeat('a', 161));
     }
 
