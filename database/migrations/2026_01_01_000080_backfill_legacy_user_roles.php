@@ -7,34 +7,38 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 return new class extends Migration {
-    private const ROLE_IDS = [
-        'OrganizationManager' => '7b5b5b3a-0a1b-4a01-8a01-000000000001',
-        'Author' => '7b5b5b3a-0a1b-4a01-8a01-000000000002',
-    ];
+    private const ROLES = ['OrganizationManager', 'Author'];
 
     public function up(): void
     {
         $now = now();
+        $roleIds = [];
 
-        foreach (self::ROLE_IDS as $name => $id) {
-            DB::table('roles')->updateOrInsert(
-                ['normalized_name' => Str::upper($name)],
-                [
+        foreach (self::ROLES as $name) {
+            $normalizedName = Str::upper($name);
+            $existing = DB::table('roles')->where('normalized_name', $normalizedName)->first();
+
+            if ($existing === null) {
+                $id = (string) Str::uuid();
+                DB::table('roles')->insert([
                     'id' => $id,
                     'name' => $name,
-                    'normalized_name' => Str::upper($name),
+                    'normalized_name' => $normalizedName,
                     'display_name' => $name,
                     'is_system' => true,
                     'concurrency_stamp' => (string) Str::uuid(),
                     'created_at' => $now,
                     'updated_at' => $now,
-                ],
-            );
+                ]);
+                $roleIds[$name] = $id;
+            } else {
+                $roleIds[$name] = (string) $existing->id;
+            }
         }
 
-        DB::table('users')->select(['id', 'role'])->orderBy('id')->chunk(200, function ($users): void {
+        DB::table('users')->select(['id', 'role'])->orderBy('id')->chunk(200, function ($users) use ($roleIds): void {
             foreach ($users as $user) {
-                $roleId = self::ROLE_IDS[$user->role] ?? null;
+                $roleId = $roleIds[$user->role] ?? null;
                 if ($roleId === null) {
                     throw new RuntimeException("Cannot migrate user {$user->id}: unsupported CMS role '{$user->role}'.");
                 }
@@ -49,7 +53,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        DB::table('user_roles')->whereIn('role_id', array_values(self::ROLE_IDS))->delete();
-        DB::table('roles')->whereIn('id', array_values(self::ROLE_IDS))->delete();
+        // Role membership backfill is intentionally irreversible: removing these
+        // assignments could revoke access that was already in use after migration.
     }
 };
