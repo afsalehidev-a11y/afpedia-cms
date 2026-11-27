@@ -26,7 +26,7 @@ final class UserAccount
         }
 
         $this->email = self::requireText($email, 'email');
-        $this->displayName = self::requireText($displayName, 'displayName');
+        $this->displayName = self::requireText($displayName, 'displayName', 160);
         $this->role = $role;
     }
 
@@ -45,11 +45,14 @@ final class UserAccount
     public function deactivate(): void { $this->isActive = false; }
     public function activate(): void { $this->isActive = true; }
 
-    private static function requireText(string $value, string $field): string
+    private static function requireText(string $value, string $field, ?int $maxLength = null): string
     {
         $value = trim($value);
         if ($value === '') {
             throw new InvalidArgumentException("{$field} is required.");
+        }
+        if ($maxLength !== null && mb_strlen($value) > $maxLength) {
+            throw new InvalidArgumentException("{$field} must not exceed {$maxLength} characters.");
         }
         return $value;
     }
