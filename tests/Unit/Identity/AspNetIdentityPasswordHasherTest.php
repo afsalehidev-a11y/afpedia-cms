@@ -33,7 +33,7 @@ final class AspNetIdentityPasswordHasherTest extends TestCase
             $salt = random_bytes(16);
             $iterations = 12000;
             $subkey = hash_pbkdf2($algorithm, $password, $salt, $iterations, 32, true);
-            $hash = base64_encode("\\x01".pack('N3', $prf, $iterations, strlen($salt)).$salt.$subkey);
+            $hash = base64_encode("\x01".pack('N3', $prf, $iterations, strlen($salt)).$salt.$subkey);
 
             self::assertTrue($hasher->verify($hash, $password), "PRF {$algorithm} should verify.");
             self::assertFalse($hasher->verify($hash, 'incorrect'), "PRF {$algorithm} should reject a wrong password.");
@@ -47,9 +47,9 @@ final class AspNetIdentityPasswordHasherTest extends TestCase
         $subkey = hash_pbkdf2('sha256', $password, $salt, 10000, 32, true);
         $hasher = new AspNetIdentityPasswordHasher();
 
-        $unsupportedPrf = base64_encode("\\x01".pack('N3', 99, 10000, strlen($salt)).$salt.$subkey);
-        $zeroIterations = base64_encode("\\x01".pack('N3', 1, 0, strlen($salt)).$salt.$subkey);
-        $shortSalt = base64_encode("\\x01".pack('N3', 1, 10000, 8).substr($salt, 0, 8).$subkey);
+        $unsupportedPrf = base64_encode("\x01".pack('N3', 99, 10000, strlen($salt)).$salt.$subkey);
+        $zeroIterations = base64_encode("\x01".pack('N3', 1, 0, strlen($salt)).$salt.$subkey);
+        $shortSalt = base64_encode("\x01".pack('N3', 1, 10000, 8).substr($salt, 0, 8).$subkey);
 
         self::assertFalse($hasher->verify($unsupportedPrf, $password));
         self::assertFalse($hasher->verify($zeroIterations, $password));
