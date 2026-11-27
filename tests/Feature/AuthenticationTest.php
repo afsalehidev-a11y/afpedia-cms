@@ -133,6 +133,54 @@ final class AuthenticationTest extends TestCase
         $this->assertNull($user->password_hash);
     }
 
+
+    public function test_login_rate_limit_allows_ten_attempts_and_blocks_the_eleventh_per_email_and_ip(): void
+    {
+        $server = ['REMOTE_ADDR' => '192.0.2.10'];
+
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $this->withServerVariables($server)->post(route('login.store'), [
+                'email' => 'missing@example.org',
+                'password' => 'incorrect-password',
+            ])->assertSessionHasErrors('email');
+        }
+
+        $this->withServerVariables($server)->post(route('login.store'), [
+            'email' => 'missing@example.org',
+            'password' => 'incorrect-password',
+        ])->assertTooManyRequests();
+    }
+
+    public function test_login_rate_limit_uses_a_separate_bucket_for_a_different_ip(): void
+    {
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.11'])->post(route('login.store'), [
+                'email' => 'missing@example.org',
+                'password' => 'incorrect-password',
+            ])->assertSessionHasErrors('email');
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.12'])->post(route('login.store'), [
+            'email' => 'missing@example.org',
+            'password' => 'incorrect-password',
+        ])->assertSessionHasErrors('email');
+    }
+
+    public function test_login_rate_limit_treats_email_case_insensitively(): void
+    {
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $this->post(route('login.store'), [
+                'email' => 'missing@example.org',
+                'password' => 'incorrect-password',
+            ])->assertSessionHasErrors('email');
+        }
+
+        $this->post(route('login.store'), [
+            'email' => 'MISSING@example.org',
+            'password' => 'incorrect-password',
+        ])->assertTooManyRequests();
+    }
+
     public function test_user_can_sign_out(): void
     {
         $user = User::create([
