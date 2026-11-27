@@ -18,20 +18,31 @@ final class CmsRoleSeeder extends Seeder
     public function run(): void
     {
         $now = now();
+
         foreach (self::ROLES as $role) {
-            DB::table('roles')->updateOrInsert(
-                ['normalized_name' => Str::upper($role['name'])],
-                [
+            $normalizedName = Str::upper($role['name']);
+            $existing = DB::table('roles')->where('normalized_name', $normalizedName)->first();
+
+            $values = [
+                'name' => $role['name'],
+                'normalized_name' => $normalizedName,
+                'display_name' => $role['display_name'],
+                'is_system' => true,
+                'concurrency_stamp' => (string) Str::uuid(),
+                'updated_at' => $now,
+            ];
+
+            if ($existing === null) {
+                DB::table('roles')->insert([
                     'id' => $role['id'],
-                    'name' => $role['name'],
-                    'normalized_name' => Str::upper($role['name']),
-                    'display_name' => $role['display_name'],
-                    'is_system' => true,
-                    'concurrency_stamp' => (string) Str::uuid(),
+                    ...$values,
                     'created_at' => $now,
-                    'updated_at' => $now,
-                ],
-            );
+                ]);
+                continue;
+            }
+
+            // Preserve IDs already referenced by user_roles.
+            DB::table('roles')->where('id', $existing->id)->update($values);
         }
     }
 }
