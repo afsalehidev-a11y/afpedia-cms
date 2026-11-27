@@ -15,6 +15,32 @@ final class UserAccountRepositoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_display_name_is_limited_to_160_characters_on_create_and_update(): void
+    {
+        $this->expectException(\\InvalidArgumentException::class);
+        new UserAccount(
+            '33333333-3333-4333-8333-333333333333',
+            'author@example.org',
+            str_repeat('a', 161),
+            UserRole::Author,
+            new \\DateTimeImmutable('2026-01-01T00:00:00+00:00'),
+        );
+    }
+
+    public function test_display_name_update_rejects_more_than_160_characters(): void
+    {
+        $account = new UserAccount(
+            '44444444-4444-4444-8444-444444444444',
+            'author@example.org',
+            'Author',
+            UserRole::Author,
+            new \\DateTimeImmutable('2026-01-01T00:00:00+00:00'),
+        );
+
+        $this->expectException(\\InvalidArgumentException::class);
+        $account->changeDisplayName(str_repeat('a', 161));
+    }
+
     public function test_it_persists_and_retrieves_account_with_original_uuid(): void
     {
         $id = '11111111-1111-4111-8111-111111111111';
