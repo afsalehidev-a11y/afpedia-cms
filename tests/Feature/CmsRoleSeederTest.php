@@ -27,17 +27,11 @@ final class CmsRoleSeederTest extends TestCase
 
     public function test_it_preserves_existing_role_ids_and_user_memberships(): void
     {
+        $role = DB::table('roles')->where('normalized_name', 'ORGANIZATIONMANAGER')->first();
+        self::assertNotNull($role);
+
         $roleId = (string) Str::uuid();
-        DB::table('roles')->insert([
-            'id' => $roleId,
-            'name' => 'OrganizationManager',
-            'normalized_name' => 'ORGANIZATIONMANAGER',
-            'display_name' => 'Existing manager role',
-            'is_system' => false,
-            'concurrency_stamp' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::table('roles')->where('id', $role->id)->update(['id' => $roleId, 'is_system' => false]);
 
         $userId = (string) Str::uuid();
         DB::table('users')->insert([
