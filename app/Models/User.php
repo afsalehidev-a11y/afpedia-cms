@@ -31,6 +31,10 @@ class User extends Authenticatable
     {
         static::creating(function (self $user): void {
             $user->id ??= (string) Str::uuid();
+
+            // Match ASP.NET Identity's CmsUser default for every creation path,
+            // not only users created through the application service.
+            $user->created_at_utc ??= now('UTC');
         });
     }
 
