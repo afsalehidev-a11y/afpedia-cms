@@ -49,6 +49,12 @@ final class UserAccountTest extends TestCase
         new UserAccount('', 'x@example.org', 'X', UserRole::Author, new \DateTimeImmutable('now'));
     }
 
+    public function test_it_rejects_the_empty_guid_used_by_dotnet(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new UserAccount('00000000-0000-0000-0000-000000000000', 'x@example.org', 'X', UserRole::Author, new \DateTimeImmutable('now'));
+    }
+
     public function test_it_rejects_blank_email_or_display_name(): void
     {
         try {
