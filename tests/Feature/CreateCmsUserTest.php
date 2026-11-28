@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Application\Identity\CreateCmsUser;
 use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -56,5 +57,18 @@ final class CreateCmsUserTest extends TestCase
         $this->assertNotNull($user->created_at_utc);
         $this->assertTrue($user->is_active);
         $this->assertSame(UserRole::OrganizationManager, $user->role);
+    }
+
+    public function test_created_at_utc_defaults_for_every_user_creation_path(): void
+    {
+        $user = User::query()->create([
+            'name' => 'Author',
+            'email' => 'author@example.org',
+            'password' => 'StrongPassword123',
+            'role' => UserRole::Author,
+        ]);
+
+        $this->assertNotNull($user->created_at_utc);
+        $this->assertSame('UTC', $user->created_at_utc->getTimezone()->getName());
     }
 }
