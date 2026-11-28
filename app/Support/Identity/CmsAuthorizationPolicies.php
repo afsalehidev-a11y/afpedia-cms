@@ -6,6 +6,7 @@ namespace App\Support\Identity;
 
 final class CmsAuthorizationPolicies
 {
-    public const MANAGER_ONLY = 'manager-only';
-    public const CONTENT_EDITORS = 'content-editors';
+    // Keep the policy identifiers aligned with the C# authorization contract.
+    public const MANAGER_ONLY = 'ManagerOnly';
+    public const CONTENT_EDITORS = 'ContentEditors';
 }
