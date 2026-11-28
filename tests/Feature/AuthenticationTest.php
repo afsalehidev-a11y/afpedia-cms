@@ -35,6 +35,44 @@ final class AuthenticationTest extends TestCase
         $this->assertSame(0, $user->fresh()->access_failed_count);
     }
 
+    public function test_login_uses_normalized_email_for_case_insensitive_lookup(): void
+    {
+        $user = User::create([
+            'name' => 'Manager',
+            'email' => 'manager@example.org',
+            'normalized_email' => 'MANAGER@EXAMPLE.ORG',
+            'password' => 'correct-password',
+            'role' => UserRole::OrganizationManager,
+            'is_active' => true,
+        ]);
+
+        $this->post(route('login.store'), [
+            'email' => '  MANAGER@EXAMPLE.ORG ',
+            'password' => 'correct-password',
+        ])->assertRedirect('/');
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_legacy_user_without_normalized_email_can_still_sign_in(): void
+    {
+        $user = User::create([
+            'name' => 'Legacy Manager',
+            'email' => 'legacy@example.org',
+            'normalized_email' => null,
+            'password' => 'correct-password',
+            'role' => UserRole::OrganizationManager,
+            'is_active' => true,
+        ]);
+
+        $this->post(route('login.store'), [
+            'email' => 'LEGACY@EXAMPLE.ORG',
+            'password' => 'correct-password',
+        ])->assertRedirect('/');
+
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_inactive_user_cannot_sign_in(): void
     {
         User::create([
@@ -84,6 +122,60 @@ final class AuthenticationTest extends TestCase
         Carbon::setTestNow();
     }
 
+    public function test_user_can_sign_in_after_lockout_expiry(): void
+    {
+        Carbon::setTestNow('2026-11-25 12:16:00');
+        $user = User::create([
+            'name' => 'Manager',
+            'email' => 'expired-lockout@example.org',
+            'password' => 'correct-password',
+            'role' => UserRole::OrganizationManager,
+            'is_active' => true,
+        ]);
+        $user->forceFill([
+            'access_failed_count' => 5,
+            'lockout_end' => now()->subSecond(),
+        ])->save();
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'correct-password',
+        ])->assertRedirect('/');
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame(0, $user->fresh()->access_failed_count);
+        $this->assertNull($user->fresh()->lockout_end);
+        Carbon::setTestNow();
+    }
+
+    public function test_lockout_disabled_user_is_not_locked_by_failed_attempts(): void
+    {
+        $user = User::create([
+            'name' => 'Manager',
+            'email' => 'no-lockout@example.org',
+            'password' => 'correct-password',
+            'role' => UserRole::OrganizationManager,
+            'is_active' => true,
+            'lockout_enabled' => false,
+        ]);
+
+        for ($attempt = 0; $attempt < 6; $attempt++) {
+            $this->post(route('login.store'), [
+                'email' => $user->email,
+                'password' => 'incorrect-password',
+            ])->assertSessionHasErrors('email');
+        }
+
+        $this->assertSame(0, $user->fresh()->access_failed_count);
+        $this->assertNull($user->fresh()->lockout_end);
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'correct-password',
+        ])->assertRedirect('/');
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_successful_sign_in_resets_failed_attempts_and_lockout(): void
     {
         $user = User::create([
@@ -104,7 +196,6 @@ final class AuthenticationTest extends TestCase
         $this->assertNull($user->fresh()->lockout_end);
     }
 
-
     public function test_legacy_aspnet_identity_password_is_upgraded_after_successful_login(): void
     {
         $password = 'LegacyPassword123';
@@ -115,7 +206,7 @@ final class AuthenticationTest extends TestCase
 
         $user = User::create([
             'name' => 'Legacy Manager',
-            'email' => 'legacy@example.org',
+            'email' => 'legacy-hash@example.org',
             'password' => 'temporary-laravel-password',
             'password_hash' => $legacyHash,
             'role' => UserRole::OrganizationManager,
@@ -132,7 +223,6 @@ final class AuthenticationTest extends TestCase
         $this->assertTrue(Hash::check($password, $user->password));
         $this->assertNull($user->password_hash);
     }
-
 
     public function test_login_rate_limit_allows_ten_attempts_and_blocks_the_eleventh_per_email_and_ip(): void
     {
