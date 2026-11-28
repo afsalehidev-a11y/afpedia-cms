@@ -59,6 +59,12 @@ final class UserAccountRepositoryTest extends TestCase
         self::assertNotNull($byId);
         self::assertSame($id, $byId->id);
         self::assertSame('author@example.org', $byId->email());
+        $stored = User::query()->findOrFail($id);
+        self::assertSame('author@example.org', $stored->user_name);
+        self::assertSame('AUTHOR@EXAMPLE.ORG', $stored->normalized_user_name);
+        self::assertSame('AUTHOR@EXAMPLE.ORG', $stored->normalized_email);
+        self::assertNotEmpty($stored->security_stamp);
+        self::assertNotEmpty($stored->concurrency_stamp);
         self::assertSame('Author', $byId->displayName());
         self::assertSame('2026-01-01T00:00:00+00:00', $byId->createdAtUtc->format('Y-m-d\TH:i:sP'));
         self::assertSame($id, $repository->getByEmail('AUTHOR@example.org')?->id);
