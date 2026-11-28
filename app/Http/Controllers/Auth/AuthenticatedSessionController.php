@@ -30,9 +30,20 @@ final class AuthenticatedSessionController
             'password' => ['required', 'string'],
         ]);
         $email = mb_strtolower(trim($credentials['email']));
+        $normalizedEmail = mb_strtoupper($email);
 
-        $authenticated = DB::transaction(function () use ($request, $email, $credentials, $aspNetHasher): bool {
-            $user = User::query()->where('email', $email)->lockForUpdate()->first();
+        $authenticated = DB::transaction(function () use ($request, $email, $normalizedEmail, $credentials, $aspNetHasher): bool {
+            $user = User::query()
+                ->where(function ($query) use ($email, $normalizedEmail): void {
+                    $query->where('normalized_email', $normalizedEmail)
+                        ->orWhere(function ($legacyQuery) use ($email): void {
+                            // Compatibility path for accounts created before normalized_email existed.
+                            $legacyQuery->whereNull('normalized_email')
+                                ->whereRaw('LOWER(email) = ?', [$email]);
+                        });
+                })
+                ->lockForUpdate()
+                ->first();
 
             if (! $user || ! $user->is_active) {
                 return false;
