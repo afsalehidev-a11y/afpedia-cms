@@ -144,12 +144,12 @@ verifier فعلی ساختارهای V2 و V3 را می‌خواند. آزمون
 - اعتبارسنجی طول payload در verifier هش ASP.NET سخت‌گیرانه‌تر شد و بردارهای ثابت فرمت V2/V3 اضافه شدند.
 - CI اکنون کل تست‌ها را روی ماتریس PHP 8.2/8.3/8.4 و MySQL 8.0/MariaDB 10.6 اجرا می‌کند.
 
-اجرای نهایی ثبت‌شده برای commit `9a2530c88ff800b5685958b6a539fa10e907def2` با موفقیت در هر شش ترکیب PHP و دیتابیس پایان یافته است:
-https://github.com/afsalehidev-a11y/afpedia-cms/actions/runs/46161426942
+اجرای نهایی ثبت‌شده برای commit `01cc2eec54f0445923296cc974f6f9dea2b01325` با موفقیت در هر شش ترکیب PHP و دیتابیس و همچنین job مستقل interoperability واقعی ASP.NET Identity پایان یافته است:
+https://github.com/afsalehidev-a11y/afpedia-cms/actions/runs/46161753769
 
 ### مواردی که هنوز نباید تکمیل‌شده اعلام شوند
 
-1. بردارهای ثابت رمز در تست PHP مطابق ساختار باینری مستند ASP.NET Identity ساخته شده‌اند؛ هنوز fixture مستقیمی که با اجرای خود `PasswordHasher<TUser>` در .NET تولید شده باشد به مخزن اضافه نشده است. بنابراین تأیید نهایی interoperability با خروجی واقعی .NET باز است.
+1. آزمون interoperability واقعی اضافه شد: CI با .NET 10 و پکیج `Microsoft.Extensions.Identity.Core` یک هش با `PasswordHasher<TUser>` تولید می‌کند و همان هش را در PHP با verifier بررسی می‌کند. اجرای اختصاصی این job موفق است.
 2. تراکنش و `lockForUpdate()` در دیتابیس‌های واقعی اجرا شده‌اند، اما آزمون رقابت هم‌زمان چند درخواست مستقل برای lockout هنوز وجود ندارد.
 3. ساخت مدیر اولیه، Browser Installer، backup/restore و بستهٔ release در نسخهٔ C# فعلی پیاده‌سازی نشده‌اند؛ این‌ها parity migration محسوب نمی‌شوند و باید به‌عنوان قابلیت‌های محصول/استقرار جداگانه طراحی و اجرا شوند.
 4. آزمون CI دیتابیس، تست migrationهای موجود در نصب تازه را پوشش می‌دهد؛ سناریوی upgrade از یک دیتابیس زنده و واقعی C# با دادهٔ موجود، هنوز آزمون end-to-end نشده است.
