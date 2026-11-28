@@ -28,15 +28,17 @@ final class AspNetIdentityPasswordHasher
         $prf = $header['prf'];
         $iterations = $header['iterations'];
         $saltLength = $header['saltLength'];
-        $subkeyLength = strlen($decoded) - 13 - $saltLength;
+        $remainingLength = strlen($decoded) - 13;
 
         $algorithms = [0 => 'sha1', 1 => 'sha256', 2 => 'sha512'];
 
+        // Reject malformed lengths before slicing or invoking the expensive KDF.
         if (! isset($algorithms[$prf]) || $iterations < 1 || $iterations > 1000000
-            || $saltLength < 16 || $subkeyLength < 16) {
+            || $saltLength < 16 || $saltLength > $remainingLength - 16) {
             return false;
         }
 
+        $subkeyLength = $remainingLength - $saltLength;
         $salt = substr($decoded, 13, $saltLength);
         $expected = substr($decoded, 13 + $saltLength);
         $actual = hash_pbkdf2($algorithms[$prf], $password, $salt, $iterations, $subkeyLength, true);
