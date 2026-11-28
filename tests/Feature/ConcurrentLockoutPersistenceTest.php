@@ -33,20 +33,13 @@ final class ConcurrentLockoutPersistenceTest extends TestCase
 
         $sockets = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP);
         self::assertIsArray($sockets, 'Unable to create IPC sockets for the concurrency test.');
-
         [$parentSocket, $childSocket] = $sockets;
-        $parentConnection = DB::connection();
-        $parentConnection->beginTransaction();
-        $lockedUser = $parentConnection->table('users')
-            ->where('id', $user->getKey())
-            ->lockForUpdate()
-            ->first();
 
-        self::assertNotNull($lockedUser);
-
+        // Do not fork while a PDO connection is open: inherited MySQL sockets are shared.
+        DB::disconnect();
         $pid = pcntl_fork();
+
         if ($pid === -1) {
-            $parentConnection->rollBack();
             fclose($parentSocket);
             fclose($childSocket);
             self::fail('Unable to fork the concurrency test worker.');
@@ -56,11 +49,14 @@ final class ConcurrentLockoutPersistenceTest extends TestCase
             fclose($parentSocket);
 
             try {
-                // Never reuse the inherited PDO socket after fork.
                 DB::purge();
+                $childConnection = DB::connection();
                 fwrite($childSocket, "ready\n");
 
-                $childConnection = DB::connection();
+                if (fgets($childSocket) !== "go\n") {
+                    throw new \RuntimeException('Parent did not release the concurrency worker.');
+                }
+
                 $childConnection->beginTransaction();
                 $childUser = $childConnection->table('users')
                     ->where('id', $user->getKey())
@@ -89,7 +85,16 @@ final class ConcurrentLockoutPersistenceTest extends TestCase
         fclose($childSocket);
         self::assertSame("ready\n", fgets($parentSocket));
 
-        // Give the child time to reach SELECT ... FOR UPDATE while our row lock is held.
+        $parentConnection = DB::connection();
+        $parentConnection->beginTransaction();
+        $lockedUser = $parentConnection->table('users')
+            ->where('id', $user->getKey())
+            ->lockForUpdate()
+            ->first();
+        self::assertNotNull($lockedUser);
+
+        fwrite($parentSocket, "go\n");
+        // The child now attempts the same row lock and must wait for our transaction.
         usleep(250000);
 
         $parentConnection->table('users')
@@ -99,12 +104,11 @@ final class ConcurrentLockoutPersistenceTest extends TestCase
 
         $childResult = fgets($parentSocket);
         fclose($parentSocket);
-
         pcntl_waitpid($pid, $status);
+
         self::assertSame("done\n", $childResult);
         self::assertTrue(pcntl_wifexited($status));
         self::assertSame(0, pcntl_wexitstatus($status));
-
         self::assertSame(2, (int) User::query()->findOrFail($user->getKey())->access_failed_count);
     }
 }
