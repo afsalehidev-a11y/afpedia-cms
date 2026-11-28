@@ -21,8 +21,8 @@ final class UserAccount
         UserRole $role,
         public readonly \DateTimeImmutable $createdAtUtc,
     ) {
-        if (! \Illuminate\Support\Str::isUuid($id)) {
-            throw new InvalidArgumentException('User ID must be a valid UUID.');
+        if (! \Illuminate\Support\Str::isUuid($id) || strtolower($id) === '00000000-0000-0000-0000-000000000000') {
+            throw new InvalidArgumentException('User ID must be a non-empty UUID.');
         }
 
         $this->email = self::requireText($email, 'email');
